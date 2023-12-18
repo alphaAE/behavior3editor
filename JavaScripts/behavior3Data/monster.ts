@@ -1,4 +1,5 @@
-{
+export namespace Behavior3Data {
+export const monster = {
   "name": "monster",
   "root": {
     "id": 1,
@@ -51,4 +52,5 @@
     ]
   },
   "desc": "怪物测试AI"
+}
 }
