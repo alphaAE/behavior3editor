@@ -384,6 +384,18 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
             filepath,
             JSON.stringify(treeModel, null, 2)
         );
+        let pathIndex = this.props.filepath.lastIndexOf("\\")
+        let slicePath = this.props.filepath.slice(0, pathIndex)
+        const filePathForTs = slicePath + `\\..\\..\\JavaScripts\\Behavoir3\\${treeModel.name}.ts`;
+        let content = "export namespace Behavior3 {\n"
+            + `export const ${treeModel.name} = ` + `${JSON.stringify(treeModel, null, 2)}`
+            + "\n}";
+        message.success("尝试保存为ts文件，目录为" + filePathForTs);
+
+        fs.writeFileSync(
+            filePathForTs,
+            content,
+        )
         this.props.onChangeSaveState(false);
         this.unsave = false;
 
