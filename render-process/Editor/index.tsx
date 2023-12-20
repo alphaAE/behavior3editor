@@ -395,7 +395,7 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
         this.graph.set("animate", true);
     }
 
-    saveToMW(treeModel: BehaviorTreeModel) {
+    async saveToMW(treeModel: BehaviorTreeModel) {
         const projectRoot = this.findRootWithProjectFile(this.props.filepath);
         if (!projectRoot) {
             message.error("未找到MW项目根目录");
@@ -405,8 +405,21 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
         this.createDirRecursive(filePathForMW);
         let content =
             `export const Behavior3_${treeModel.name} = ` + `${JSON.stringify(treeModel, null, 2)}`;
-        fs.writeFileSync(path.resolve(filePathForMW, `${treeModel.name}.ts`), content);
+        await fs.writeFileSync(path.resolve(filePathForMW, `${treeModel.name}.ts`), content);
+        this.saveMWMap(filePathForMW);
         message.success("已保存MW文件：" + filePathForMW);
+    }
+
+    saveMWMap(filePathForMW: string) {
+        let content = `const Behavior3Map: Map<string, any> = new Map();`;
+        let filteredFiles = fs
+            .readdirSync(filePathForMW)
+            .filter((file) => !(file == "BehaviorMap.ts"));
+        for (const file of filteredFiles) {
+            const name = file.replace(".ts", "");
+            content += `\nimport { Behavior3_${name} } from "./${name}";Behavior3Map.set("${name}", Behavior3_${name});`;
+        }
+        fs.writeFileSync(path.resolve(filePathForMW, `BehaviorMap.ts`), content);
     }
 
     createDirRecursive(dirPath: string) {
