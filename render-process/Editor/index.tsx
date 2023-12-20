@@ -396,19 +396,17 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
     }
 
     saveToMW(treeModel: BehaviorTreeModel) {
-        const filePathForMW = path.resolve(
-            this.props.filepath,
-            "..",
-            "..",
-            "..",
-            "JavaScripts",
-            "behavior3Data"
-        );
+        const projectRoot = this.findRootWithProjectFile(this.props.filepath);
+        if (!projectRoot) {
+            message.error("未找到MW项目根目录");
+            return;
+        }
+        const filePathForMW = path.resolve(projectRoot, "JavaScripts", "behavior3Data");
         this.createDirRecursive(filePathForMW);
         let content =
             `export const Behavior3_${treeModel.name} = ` + `${JSON.stringify(treeModel, null, 2)}`;
         fs.writeFileSync(path.resolve(filePathForMW, `${treeModel.name}.ts`), content);
-        message.success("保存为MW文件：" + filePathForMW);
+        message.success("已保存MW文件：" + filePathForMW);
     }
 
     createDirRecursive(dirPath: string) {
@@ -419,6 +417,24 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
                 fs.mkdirSync(currentPath);
             }
         }
+    }
+
+    findRootWithProjectFile(currentPath: string) {
+        const rootPath = path.parse(currentPath).root;
+        const searchUp = (currentDir: string): string => {
+            const projectFilePath = path.join(currentDir, "JavaScripts");
+            if (fs.existsSync(projectFilePath)) {
+                // 找到包含 .project 文件的目录
+                return currentDir;
+            }
+            const parentDir = path.dirname(currentDir);
+            // 如果已经到达根目录，则停止搜索
+            if (parentDir === currentDir) {
+                return null;
+            }
+            return searchUp(parentDir);
+        };
+        return searchUp(currentPath) || null;
     }
 
     getTreeModel() {
