@@ -411,7 +411,7 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
     }
 
     saveMWMap(filePathForMW: string) {
-        let content = `const Behavior3Map: Map<string, any> = new Map();`;
+        let content = `export const Behavior3Map: Map<string, any> = new Map();`;
         let filteredFiles = fs
             .readdirSync(filePathForMW)
             .filter((file) => !(file == "BehaviorMap.ts"));
