@@ -1,5 +1,4 @@
-export namespace Behavior3Data {
-export const hero = {
+export const Behavior3_hero = {
   "name": "hero",
   "root": {
     "id": 1,
@@ -113,5 +112,4 @@ export const hero = {
     ]
   },
   "desc": "英雄测试AI"
-}
 }

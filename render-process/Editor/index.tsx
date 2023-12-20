@@ -16,7 +16,7 @@ import Settings from "../../main-process/Settings";
 
 import "./Editor.css";
 import { clipboard } from "electron";
-import { Matrix } from '@antv/g6/lib/types';
+import { Matrix } from "@antv/g6/lib/types";
 
 export interface EditorProps {
     filepath: string;
@@ -26,7 +26,7 @@ export interface EditorProps {
 interface EditorState {
     curNodeId?: string;
     blockNodeSelectChange?: boolean;
-    viewportMatrix?: Matrix
+    viewportMatrix?: Matrix;
 }
 
 export default class Editor extends React.Component<EditorProps, EditorState> {
@@ -56,7 +56,9 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
     }
 
     shouldComponentUpdate(nextProps: EditorProps, nextState: EditorState) {
-        return this.props.filepath != nextProps.filepath || this.state.curNodeId != nextState.curNodeId;
+        return (
+            this.props.filepath != nextProps.filepath || this.state.curNodeId != nextState.curNodeId
+        );
     }
 
     componentDidMount() {
@@ -118,10 +120,10 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
         });
 
         graph.on("viewportchange", (data: any) => {
-            if (data.action == 'translate' || data.action == 'zoom') {
-                this.state.viewportMatrix = data.matrix
+            if (data.action == "translate" || data.action == "zoom") {
+                this.state.viewportMatrix = data.matrix;
             }
-        })
+        });
 
         graph.on("contextmenu", (e: G6GraphEvent) => {
             require("@electron/remote").Menu.getApplicationMenu().popup();
@@ -146,7 +148,7 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
         graph.on("nodeselectchange", (e: G6GraphEvent) => {
             if (this.state.blockNodeSelectChange) {
                 // ** 重置选中效果
-                this.onSelectNode(this.state.curNodeId)
+                this.onSelectNode(this.state.curNodeId);
                 return;
             }
             if (e.target) {
@@ -380,20 +382,9 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
             root,
             desc: this.treeModel.desc,
         } as BehaviorTreeModel;
-        fs.writeFileSync(
-            filepath,
-            JSON.stringify(treeModel, null, 2)
-        );
-        let pathIndex = this.props.filepath.lastIndexOf("\\")
-        let slicePath = this.props.filepath.slice(0, pathIndex)
-        const filePathForTs = slicePath + `\\..\\..\\JavaScripts\\behavior3Data\\${treeModel.name}.ts`;
-        let content = `export const Behavoir3_${treeModel.name} = ` + `${JSON.stringify(treeModel, null, 2)}`
-        message.success("尝试保存为ts文件，目录为" + filePathForTs);
+        fs.writeFileSync(filepath, JSON.stringify(treeModel, null, 2));
+        this.saveToMW(treeModel);
 
-        fs.writeFileSync(
-            filePathForTs,
-            content,
-        )
         this.props.onChangeSaveState(false);
         this.unsave = false;
 
@@ -402,6 +393,32 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
         this.graph.layout();
         this.restoreViewport();
         this.graph.set("animate", true);
+    }
+
+    saveToMW(treeModel: BehaviorTreeModel) {
+        const filePathForMW = path.resolve(
+            this.props.filepath,
+            "..",
+            "..",
+            "..",
+            "JavaScripts",
+            "behavior3Data"
+        );
+        this.createDirRecursive(filePathForMW);
+        let content =
+            `export const Behavior3_${treeModel.name} = ` + `${JSON.stringify(treeModel, null, 2)}`;
+        fs.writeFileSync(path.resolve(filePathForMW, `${treeModel.name}.ts`), content);
+        message.success("保存为MW文件：" + filePathForMW);
+    }
+
+    createDirRecursive(dirPath: string) {
+        const parts = dirPath.split(path.sep);
+        for (let i = 1; i <= parts.length; i++) {
+            const currentPath = path.join(...parts.slice(0, i));
+            if (!fs.existsSync(currentPath)) {
+                fs.mkdirSync(currentPath);
+            }
+        }
     }
 
     getTreeModel() {
@@ -466,7 +483,7 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
     }
 
     pushUndoStack(keepRedo?: boolean) {
-        this.undoStack.push(Utils.cloneNodeData(this.graph.findDataById('1') as GraphNodeModel));
+        this.undoStack.push(Utils.cloneNodeData(this.graph.findDataById("1") as GraphNodeModel));
         console.log("push undo", this.undoStack);
         if (!keepRedo) {
             this.redoStack = [];
@@ -474,7 +491,7 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
     }
 
     pushRedoStack() {
-        this.redoStack.push(Utils.cloneNodeData(this.graph.findDataById('1') as GraphNodeModel));
+        this.redoStack.push(Utils.cloneNodeData(this.graph.findDataById("1") as GraphNodeModel));
         console.log("push redo", this.redoStack);
     }
 
@@ -514,12 +531,21 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
         return (
             <div className="editor">
                 <Row className="editorBd">
-                    <Col span={18} className="editorContent" ref={this.ref} onMouseDownCapture={(event) => {
-                        this.state.blockNodeSelectChange = false;
-                    }} />
-                    <Col span={6} className="editorSidebar" onMouseDownCapture={(event) => {
-                        this.state.blockNodeSelectChange = true;
-                    }}>
+                    <Col
+                        span={18}
+                        className="editorContent"
+                        ref={this.ref}
+                        onMouseDownCapture={(event) => {
+                            this.state.blockNodeSelectChange = false;
+                        }}
+                    />
+                    <Col
+                        span={6}
+                        className="editorSidebar"
+                        onMouseDownCapture={(event) => {
+                            this.state.blockNodeSelectChange = true;
+                        }}
+                    >
                         {curNode ? (
                             <NodePanel
                                 model={curNode}
@@ -543,12 +569,8 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
                         ) : (
                             <TreePanel
                                 model={this.treeModel}
-                                onRenameTree={(name: string) => {
-
-                                }}
-                                onRemoveTree={() => {
-
-                                }}
+                                onRenameTree={(name: string) => {}}
+                                onRemoveTree={() => {}}
                                 onChangeTreeDesc={(desc) => {
                                     this.changeTreeDesc(desc);
                                 }}

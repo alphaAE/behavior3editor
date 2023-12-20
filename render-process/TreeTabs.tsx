@@ -59,7 +59,7 @@ export default class TreeTabs extends Component<TreeTabsProps, TreeTabsState> {
             }
             const editor = this.editors[curPath];
             editor.save();
-            message.success("已保存");
+            message.success("已保存Json");
         });
 
         ipcRenderer.on(MainEventType.SAVE_ALL, (event: any) => {
