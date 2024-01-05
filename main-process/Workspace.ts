@@ -14,6 +14,7 @@ export interface WorkspaceModel {
     nodeConfPath: string;
     workdir: string;
     servers?: ServerModel[];
+    mwOutDir?: string;
 }
 
 const unknowNodeType: BehaviorNodeTypeModel = {

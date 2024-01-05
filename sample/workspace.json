@@ -1,5 +1,6 @@
 {
   "isRelative": true,
   "nodeConfPath": "node-config.json",
-  "workdir": "workdir"
+  "workdir": "workdir",
+  "mwOutDir": "JavaScripts/configB3"
 }

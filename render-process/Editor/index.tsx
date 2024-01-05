@@ -401,7 +401,10 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
             message.error("未找到MW项目根目录");
             return;
         }
-        const filePathForMW = path.resolve(projectRoot, "JavaScripts", "behavior3Data");
+        const mwOutDir = this.settings.curWorkspace.getModel().mwOutDir
+            ? this.settings.curWorkspace.getModel().mwOutDir
+            : "JavaScripts/configB3";
+        const filePathForMW = path.resolve(projectRoot, mwOutDir);
         this.createDirRecursive(filePathForMW);
         let content =
             `export const Behavior3_${treeModel.name} = ` + `${JSON.stringify(treeModel, null, 2)}`;
@@ -414,6 +417,7 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
         let content = `export const Behavior3Map: Map<string, any> = new Map();`;
         let filteredFiles = fs
             .readdirSync(filePathForMW)
+            .filter((file) => file.endsWith(".ts"))
             .filter((file) => !(file == "BehaviorMap.ts"));
         for (const file of filteredFiles) {
             const name = file.replace(".ts", "");
